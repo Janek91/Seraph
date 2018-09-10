@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 namespace Seraph
 {
@@ -12,25 +13,21 @@ namespace Seraph
 
     public class DataGridViewCheckBoxHeaderCellEventArgs : EventArgs
     {
-        bool _bChecked;
         public DataGridViewCheckBoxHeaderCellEventArgs(bool bChecked)
         {
-            _bChecked = bChecked;
+            Checked = bChecked;
         }
-        public bool Checked
-        {
-            get { return _bChecked; }
-        }
+        public bool Checked { get; }
     }
 
-    class DatagridViewCheckBoxHeaderCell : DataGridViewColumnHeaderCell
+    internal class DatagridViewCheckBoxHeaderCell : DataGridViewColumnHeaderCell
     {
         Point checkBoxLocation;
         Size checkBoxSize;
-        bool _checked = false;
-        Point _cellLocation = new Point();
-        System.Windows.Forms.VisualStyles.CheckBoxState _cbState =
-            System.Windows.Forms.VisualStyles.CheckBoxState.UncheckedNormal;
+        bool _checked;
+        Point _cellLocation;
+        CheckBoxState _cbState =
+            CheckBoxState.UncheckedNormal;
         public event CheckBoxClickedHandler OnCheckBoxClicked;
 
         public bool IsDirty { get; set; }
@@ -40,9 +37,9 @@ namespace Seraph
             IsDirty = false;
         }
 
-        protected override void Paint(System.Drawing.Graphics graphics,
-            System.Drawing.Rectangle clipBounds,
-            System.Drawing.Rectangle cellBounds,
+        protected override void Paint(Graphics graphics,
+            Rectangle clipBounds,
+            Rectangle cellBounds,
             int rowIndex,
             DataGridViewElementStates dataGridViewElementState,
             object value,
@@ -58,7 +55,7 @@ namespace Seraph
                 advancedBorderStyle, paintParts);
             Point p = new Point();
             Size s = CheckBoxRenderer.GetGlyphSize(graphics,
-            System.Windows.Forms.VisualStyles.CheckBoxState.UncheckedNormal);
+            CheckBoxState.UncheckedNormal);
             p.X = cellBounds.Location.X +
                 (cellBounds.Width / 2) - (s.Width / 2);
             p.Y = cellBounds.Location.Y +
@@ -67,14 +64,18 @@ namespace Seraph
             checkBoxLocation = p;
             checkBoxSize = s;
             if (IsDirty)
-                _cbState = System.Windows.Forms.VisualStyles.
-                    CheckBoxState.MixedNormal;
+            {
+                _cbState = CheckBoxState.MixedNormal;
+            }
             else if (_checked)
-                _cbState = System.Windows.Forms.VisualStyles.
-                    CheckBoxState.CheckedNormal;
+            {
+                _cbState = CheckBoxState.CheckedNormal;
+            }
             else
-                _cbState = System.Windows.Forms.VisualStyles.
-                    CheckBoxState.UncheckedNormal;
+            {
+                _cbState = CheckBoxState.UncheckedNormal;
+            }
+
             CheckBoxRenderer.DrawCheckBox
             (graphics, checkBoxLocation, _cbState);
         }
@@ -92,7 +93,7 @@ namespace Seraph
                 if (OnCheckBoxClicked != null)
                 {
                     OnCheckBoxClicked(_checked);
-                    this.DataGridView.InvalidateCell(this);
+                    DataGridView.InvalidateCell(this);
                 }
 
             }

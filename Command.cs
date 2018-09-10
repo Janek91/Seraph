@@ -6,7 +6,7 @@ namespace Seraph
 {
     class Command
     {
-        static public string ExecuteCmd(string arguments)
+        public static string ExecuteCmd(string arguments)
         {
             string output;
             // Start the child process.
@@ -29,7 +29,7 @@ namespace Seraph
             return output;
         }
 
-        static public string Consume(ref string sLine, char separator)
+        public static string Consume(ref string sLine, char separator)
         {
             char[] separators = { separator };
             string[] slice = sLine.Split(separators, 2);
@@ -37,30 +37,43 @@ namespace Seraph
             return slice[0].Trim();
         }
 
-        static public IEnumerable<Handler> Handle(string sFile)
+        public static IEnumerable<Handler> Handle(string sFile)
         {
             string output = ExecuteCmd("handle " + sFile);
             using (StringReader reader = new StringReader(output))
             {
                 string line;
-                Handler handler = null;
                 while ((line = reader.ReadLine()) != null)
                 {
                     line = line.Trim();
 
                     // Skip header
                     if (string.IsNullOrEmpty(line))
+                    {
                         continue;
-                    if (line.EndsWith("Handle viewer")) // Nthandle v4.1 - Handle viewer
-                        continue;
-                    if (line.EndsWith("Mark Russinovich")) // Copyright (C) 1997-2016 Mark Russinovich
-                        continue;
-                    if (line.EndsWith("www.sysinternals.com")) // Sysinternals - www.sysinternals.com
-                        continue;
-                    if (line.StartsWith("No matching handles found.")) // Sysinternals - www.sysinternals.com
-                        break;
+                    }
 
-                    handler = new Handler();
+                    if (line.EndsWith("Handle viewer")) // Nthandle v4.1 - Handle viewer
+                    {
+                        continue;
+                    }
+
+                    if (line.EndsWith("Mark Russinovich")) // Copyright (C) 1997-2016 Mark Russinovich
+                    {
+                        continue;
+                    }
+
+                    if (line.EndsWith("www.sysinternals.com")) // Sysinternals - www.sysinternals.com
+                    {
+                        continue;
+                    }
+
+                    if (line.StartsWith("No matching handles found.")) // Sysinternals - www.sysinternals.com
+                    {
+                        break;
+                    }
+
+                    Handler handler = new Handler();
 
                     // Exemple of an output:
                     // explorer.exe       pid: 6088   type: File           6D4: C:\Seraph
@@ -77,12 +90,9 @@ namespace Seraph
             }
         }
 
-        static public void Close(Handler handler)
+        public static void Close(Handler handler)
         {
-            string output = ExecuteCmd(
-                    string.Format("handle -c {0} -y -p {1}",
-                        handler.Handle,
-                        handler.Pid));
+            string output = ExecuteCmd($"handle -c {handler.Handle} -y -p {handler.Pid}");
         }
     }
 }
